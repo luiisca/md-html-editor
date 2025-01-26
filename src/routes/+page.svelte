@@ -1,28 +1,33 @@
 <script lang="ts">
-    import * as hypermd from "hypermd";
     import { onMount } from "svelte";
-    import { md } from "./constants";
     import { transform } from "./transformer";
+    import type { PageProps } from "./$types";
+    import { browser } from "$app/environment";
+
+    let { data }: PageProps = $props();
     let myTextarea = $state<HTMLTextAreaElement | null>(null);
     let outputArea = $state<HTMLElement | null>(null);
     let editor = $state<CodeMirror.Editor | null>(null);
+    let md = $state<string | null>(data?.md ?? null);
 
-    onMount(() => {
-        if (myTextarea) {
+    onMount(async () => {
+        const hypermd = await import("hypermd");
+
+        if (myTextarea && hypermd) {
             editor = hypermd.fromTextArea(myTextarea, {
                 lineNumbers: false,
                 foldGutter: false,
                 autofocus: true,
             } satisfies CodeMirror.EditorConfiguration);
+
+            handleMdToHtml();
         }
     });
 
     async function handleMdToHtml() {
-        if (editor) {
-            if (outputArea) {
-                const res = await transform(editor.getValue());
-                outputArea.innerHTML = res.toString();
-            }
+        if (editor && outputArea) {
+            const res = await transform(editor.getValue());
+            outputArea.innerHTML = res.toString();
         }
     }
     function focusEditor() {
@@ -42,6 +47,7 @@
             tabindex="0"
         >
             <textarea
+                class={!browser ? "opacity-0" : ""}
                 id="input-area"
                 rows="10"
                 cols="50"
@@ -63,7 +69,7 @@
 
 <style lang="postcss">
     :global(.CodeMirror) {
-        @apply h-full;
+        @apply h-full !important;
     }
     :global(.CodeMirror-gutters) {
         @apply hidden;
@@ -72,3 +78,4 @@
         @apply after:content-[""] after:hidden !important;
     }
 </style>
+
