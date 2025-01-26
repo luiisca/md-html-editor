@@ -3,6 +3,7 @@
     import { transform } from "./transformer";
     import type { PageProps } from "./$types";
     import { browser } from "$app/environment";
+    import { saveFile } from "$lib";
 
     let { data }: PageProps = $props();
     let myTextarea = $state<HTMLTextAreaElement | null>(null);
@@ -27,7 +28,18 @@
     async function handleMdToHtml() {
         if (editor && outputArea) {
             const res = await transform(editor.getValue());
-            outputArea.innerHTML = res.toString();
+            const html = res.toString().trim();
+            outputArea.innerHTML = html;
+
+            return html;
+        }
+    }
+    async function handleSaveFile() {
+        const html = await handleMdToHtml();
+        if (html) {
+            saveFile(html);
+        } else {
+            alert("Error saving file");
         }
     }
     function focusEditor() {
@@ -62,8 +74,11 @@
             bind:this={outputArea}
         ></div>
     </div>
-    <div class="flex h-[5vh] border-t border-t-gray-200 items-center px-4">
+    <div
+        class="flex flex-row gap-x-2 h-[5vh] border-t border-t-gray-200 items-center px-4"
+    >
         <button onclick={handleMdToHtml}>Transform</button>
+        <button onclick={handleSaveFile}>Save</button>
     </div>
 </div>
 
@@ -78,4 +93,3 @@
         @apply after:content-[""] after:hidden !important;
     }
 </style>
-
