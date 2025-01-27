@@ -1,9 +1,9 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { transform } from "./transformer";
     import type { PageProps } from "./$types";
     import { browser } from "$app/environment";
-    import { saveFile } from "$lib";
+    import { saveFile, processArticle } from "$lib";
+    import "../outdoc.css";
 
     let { data }: PageProps = $props();
     let myTextarea = $state<HTMLTextAreaElement | null>(null);
@@ -27,7 +27,7 @@
 
     async function handleMdToHtml() {
         if (editor && outputArea) {
-            const res = await transform(editor.getValue());
+            const res = await processArticle(editor.getValue());
             const html = res.toString().trim();
             outputArea.innerHTML = html;
 
@@ -48,6 +48,13 @@
         }
     }
 </script>
+
+{#snippet button(handle: () => void, text: string)}
+    <button
+        class="h-full border-r border-r-gray-200 px-4 hover:bg-gray-200 hover:text-gray-800"
+        onclick={handle}>{text}</button
+    >
+{/snippet}
 
 <div class="flex flex-col h-screen w-screen">
     <div class="flex h-[95vh]">
@@ -70,15 +77,18 @@
         </div>
         <div
             id="output-area"
-            class="prose border-l border-l-gray-200 min-w-[50%] w-1/2 h-full px-4 py-2 overflow-y-auto"
+            class="prose border-l border-l-gray-200 min-w-[50%] w-1/2 h-full px-4 pl-7 py-2 overflow-y-auto"
             bind:this={outputArea}
         ></div>
     </div>
     <div
-        class="flex flex-row gap-x-2 h-[5vh] border-t border-t-gray-200 items-center px-4"
+        class="flex flex-row h-[5vh] border-t border-t-gray-200 items-center px-4"
     >
-        <button onclick={handleMdToHtml}>Transform</button>
-        <button onclick={handleSaveFile}>Save</button>
+        <div class="w-1/2 h-full"></div>
+        <div class="w-1/2 border-l border-l-gray-200 flex flex-row h-full">
+            {@render button(handleMdToHtml, "Transform")}
+            {@render button(handleSaveFile, "Save")}
+        </div>
     </div>
 </div>
 

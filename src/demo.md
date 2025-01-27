@@ -1,6 +1,6 @@
 # Pluto
 
-Pluto is an dwarf planet in the Kuiper belt.
+Pluto is a dwarf planet in the Kuiper belt.
 
 ```ts
 let greeting = "hello";

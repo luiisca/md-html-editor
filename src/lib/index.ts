@@ -1,3 +1,4 @@
 // place files you want to import through the `$lib` alias in this folder.
 //
-export * from './write.ts'
+export * from './write'
+export * from './gen'

@@ -1,0 +1,12 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+@import "@wooorm/starry-night/style/dark";
+
+.anchor {
+  display: inline-block;
+  width: calc(1 * (1em + 1ex));
+  margin-left: calc(-0.75 * (1em + 1ex));
+  margin-right: calc(-0.25 * (1em + 1ex));
+  font-size: 1rem;
+}
