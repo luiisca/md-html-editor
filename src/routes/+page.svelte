@@ -95,7 +95,9 @@
         <div class="w-1/2 h-full"></div>
         <div class="w-1/2 border-l border-l-gray-200 flex flex-row h-full">
             {@render button(handleMdToHtml, "Transform")}
-            {@render button(handleSaveFile, "Save")}
+            {#if saveEnabled}
+                {@render button(handleSaveFile, "Save")}
+            {/if}
         </div>
     </div>
 </div>
