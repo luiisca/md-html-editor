@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     import type { PageProps } from "./$types";
     import { browser } from "$app/environment";
-    import { saveFile, processArticle } from "$lib";
+    import { saveFile, processArticle, processArticleBefSave } from "$lib";
     import "../outdoc.css";
 
     let { data }: PageProps = $props();
@@ -10,6 +10,7 @@
     let outputArea = $state<HTMLElement | null>(null);
     let editor = $state<CodeMirror.Editor | null>(null);
     let md = $state<string | null>(data?.md ?? null);
+    let saveEnabled = $state(false);
 
     onMount(async () => {
         const hypermd = await import("hypermd");
@@ -23,6 +24,9 @@
 
             handleMdToHtml();
         }
+        if (editor && outputArea) {
+            saveEnabled = true;
+        }
     });
 
     async function handleMdToHtml() {
@@ -35,12 +39,16 @@
         }
     }
     async function handleSaveFile() {
-        const html = await handleMdToHtml();
-        if (html) {
-            saveFile(html);
-        } else {
-            alert("Error saving file");
+        if (editor && outputArea) {
+            const res = await processArticleBefSave(editor.getValue());
+            const html = res.toString().trim();
+            if (html) {
+                saveFile(html);
+            } else {
+                alert("Error saving file");
+            }
         }
+        await handleMdToHtml();
     }
     function focusEditor() {
         if (editor) {

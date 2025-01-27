@@ -101,27 +101,48 @@ const articleProcessor = unified()
         }
     })
     .use(rehypeLink)
-    .use(rehypeDocument, {
-        link: [
-            { href: 'index.css', rel: 'stylesheet' },
-        ]
-    })
-    .use(function addProseClass() {
-        return function(tree: Root) {
-            visit(tree, 'element', (node) => {
-                if (node.tagName === 'body') {
-                    node.properties = node.properties || {};
-                    const classes = node.properties.className || [];
-                    if (typeof classes === 'object' && !classes.includes('prose')) {
-                        classes.push('prose mx-auto');
-                    }
-                    node.properties.className = classes;
-                }
-            });
-        };
-    })
-    .use(rehypeStringify)
+    .freeze()
 
 export async function processArticle(source: string) {
-    return await articleProcessor.process(source)
+    return await articleProcessor()
+        .use(rehypeStringify)
+        .process(source)
+}
+
+export async function processArticleBefSave(source: string) {
+    return await articleProcessor()
+        .use(rehypeDocument)
+        .use(function addStylesheetLink() {
+            return function(tree: Root) {
+                visit(tree, 'element', (node) => {
+                    if (node.tagName === 'head') {
+                        node.children.push({
+                            type: 'element',
+                            tagName: 'link',
+                            properties: {
+                                rel: 'stylesheet',
+                                href: 'index.css'
+                            },
+                            children: []
+                        })
+                    }
+                })
+            }
+        })
+        .use(function addProseClass() {
+            return function(tree: Root) {
+                visit(tree, 'element', (node) => {
+                    if (node.tagName === 'body') {
+                        node.properties = node.properties || {};
+                        const classes = node.properties.className || [];
+                        if (typeof classes === 'object' && !classes.includes('prose')) {
+                            classes.push('prose mx-auto');
+                        }
+                        node.properties.className = classes;
+                    }
+                });
+            };
+        })
+        .use(rehypeStringify)
+        .process(source)
 }

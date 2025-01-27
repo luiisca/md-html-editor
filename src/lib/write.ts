@@ -5,20 +5,18 @@ export async function saveFile(htmlContent: string) {
         const zip = new JSZip();
         const output = zip.folder('output');
 
-        const outDocCssStyles = [...document.styleSheets].filter(x => {
-            return ((x.ownerNode as any).attributes.getNamedItem('data-vite-dev-id')?.value as string | null)?.endsWith('outdoc.css')
-        }).pop()
-        if (!outDocCssStyles) return;
+        const styles = Array.from(document.styleSheets)
+            .map(sheet => {
+                try {
+                    return Array.from(sheet.cssRules)
+                        .map(rule => rule.cssText)
+                        .join('\n');
+                } catch {
+                    return '';
+                }
+            })
+            .join('\n\n');
 
-        let styles = "";
-
-        try {
-            styles = Array.from(outDocCssStyles.cssRules)
-                .map(rule => rule.cssText)
-                .join('\n');
-        } catch {
-            styles = '';
-        }
         output?.file('index.html', htmlContent)
         output?.file('index.css', styles)
 
